@@ -1,1 +1,11 @@
-
+{
+  "profiles": {
+    "DataComNUnitWithPW_PageTest": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "BROWSER": "firefox",
+        "HEADED": "1"
+      }
+    }
+  }
+}
