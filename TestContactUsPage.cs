@@ -160,7 +160,7 @@ namespace DataComNUnitWithPW_PageTest
         }
 
         [Test]
-        public async Task TestAsizRegionalContactNavigation()
+        public async Task TestAsiaRegionalContactNavigation()
         {
             var listItem = Page.Locator("ul.cmp-location__nav__items > li[data-tab-section-id='.item2']").Filter(new() { HasText = "Asia" });
             await listItem.ClickAsync();
