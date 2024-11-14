@@ -1,9 +1,12 @@
 using Microsoft.Playwright;
 using NUnit.Framework.Interfaces;
+using System;
 using System.Data;
+using System.Reflection.Emit;
 using System.Reflection.Metadata.Ecma335;
 using static System.Collections.Specialized.BitVector32;
 using static System.Net.Mime.MediaTypeNames;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace DataComNUnitWithPW_PageTest
 {
@@ -225,7 +228,7 @@ namespace DataComNUnitWithPW_PageTest
             await Expect(signInHdrDescription).ToHaveTextAsync("Get access to Datacom's payroll applications and specific marketplace platforms for your region.");
 
             //Filtering on { HasText = "Direct Access Direct Access" } will be better than using the index.
-            var directAxisSignIn = Page.Locator("a[href = 'https://datacomdirectaccess.co.nz/login'][adobe-analytics = 'SignInPortalClicked']").Nth(1); 
+            var directAxisSignIn = Page.Locator("a[href = 'https://datacomdirectaccess.co.nz/login'][adobe-analytics = 'SignInPortalClicked']").Nth(1);
             //var filteredButton = directAxisSignIn.Filter(new() { HasText = "Sign in" });
             await directAxisSignIn.ClickAsync();
 
@@ -236,5 +239,48 @@ namespace DataComNUnitWithPW_PageTest
             await Page.GetByRole(AriaRole.Button, new() { Name = "Log In" }).ClickAsync();
             await Page.GetByRole(AriaRole.Button, new() { Name = "OK" }).ClickAsync();
         }
+
+        [Test]
+        public async Task TestAsiaDefaultMalaysiaNavigation_BDD()
+        {
+            // Given: The user is on the contact-us page (https://datacom.com/nz/en/contact-us).
+            var locationsTitle = Page.Locator("h2.cmp-title__text");
+            await Expect(locationsTitle).ToBeVisibleAsync();
+            await Expect(locationsTitle).ToHaveTextAsync("Our locations");
+            Assert.That(await Page.TitleAsync(), Is.EqualTo("Contact Us — Get In Touch"));
+
+            // When: The user clicks Asia.
+            var regionsAsia = Page.Locator("ul > li[data-tab-section-id='.item2']:has-text('Asia')");
+            await regionsAsia.ClickAsync();
+
+            // Then: The Malasian contact details should be shown.
+            var malaysiaAddress = Page.Locator("#section-0 > div:has-text('Malaysia')");
+            await Expect(malaysiaAddress).ToBeVisibleAsync();
+            var addressMalaysia = Page.Locator("div[region='Asia'] > div#section-0 > div > div > p.cmp-location__location__address");
+            await Expect(addressMalaysia).ToHaveTextAsync("Level 3A, 1 Sentral, Jalan Rakyat, Kuala Lumpur Sentral, Kuala Lumpur 50470");
+        }
+
+        [Test]
+        public async Task TestAsiaSingaporeNavigation_BDD()
+        {
+            // (https://datacom.com/nz/en/contact-us)
+            // Given: The user is on the contact-us page and has navigated to Asia, showing the Malalsian contact details and the Asia contact options. 
+            var regionsAsia = Page.Locator("ul > li[data-tab-section-id='.item2']:has-text('Asia')");
+            await regionsAsia.ClickAsync();
+
+            // When: The user clicks on Singapore.   //div[region='Asia'] > div#section-2 > div:has-text('Singapore')
+            var singaporeContacts = Page.Locator("div[region='Asia'] > div#section-2 > div.cmp-location__location__name:has-text('Singapore')");
+            await singaporeContacts.ClickAsync();
+
+            // Then: The Singapore address, phone and email details should be shown.
+            //div#section-2.cmp-location__location-container div.cmp-location__location__details
+            var singaporeAddress = Page.Locator("div.cmp-location__location__details > div > p.cmp-location__location__address:has-text('38 Beach Road, South Beach Tower, #29-11 Singapore 189767')");
+            await Expect(singaporeAddress).ToBeVisibleAsync();
+            var singaporePhone = Page.Locator("div.cmp-location__location__details > p.cmp-location__location__phone > a.focus-underline-animated:Has-Text('+60 3 2109 1000')");
+            await Expect(singaporePhone).ToBeVisibleAsync();
+            var singaporeEmail = Page.Locator("div.cmp-location__location__details > p.cmp-location__location__email > a.focus-underline-animated:Has-Text('felicisimo.gadaingan@datacom.com.au')");
+            await Expect(singaporeEmail).ToBeVisibleAsync();
+        }
     }
 }
+
